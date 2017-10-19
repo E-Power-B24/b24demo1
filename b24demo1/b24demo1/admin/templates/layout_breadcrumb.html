@@ -1,0 +1,11 @@
+<nav class="navbar" style="margin:0;">
+    <ol class="breadcrumb pull-left" style="background:none; padding:0;">
+        {% block breadcrumb %}{% endblock %}
+    </ol>
+    <div class="pull-right">
+        {% block breadcrumb_action %}{% endblock %}
+    </div>
+</nav>
+
+{% block content %}{% endblock %}
+{% block script %}{% endblock %}

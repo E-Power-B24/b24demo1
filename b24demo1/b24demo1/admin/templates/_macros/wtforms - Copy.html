@@ -1,0 +1,104 @@
+{% macro render_field(field) %}
+<div class="w-95">
+    {{ field.label }}
+    {{ field(**kwargs)|safe }}
+
+    {% if field.errors %}
+    <span class="field-validation-invalid field-validation-error" data-valmsg-for="{{ field.name }}" data-valmsg-replace="true">
+        {% for error in field.errors %}
+        <span for="{{ field.name }}" generated="true">{{ error }}</span>
+        {% endfor %}
+    </span>
+    {% else %}
+    <span class="field-validation-valid" data-valmsg-for="{{ field.name }}" data-valmsg-replace="true"></span>
+    {% endif %}
+</div>
+{% endmacro %}
+
+{% macro render_checkbox_field(field) -%}
+<div class="w-90">
+    {{ field.label }}
+    {{ field(type='checkbox', **kwargs) }}
+</div>
+{%- endmacro %}
+
+{% macro render_form(form, action_url='', return_url='', return_text='Back', action_text='Submit', class_='', btn_class='btn btn-primary', btn_class1='btn btn-danger', id='form' ) -%}
+<div class="w-70">
+    <form method="POST" action="{{ action_url }}" role="form" data-toggle="validator" class="{{ class_ }}" id="{{ id }}">
+        {{ form.hidden_tag() if form.hidden_tag }}
+        {% if caller %}
+        {% if 'id' in form %}
+        {{ render_error(form.id) }}
+        {% endif %}
+        {{ caller() }}
+        {% else %}
+        {% for f in form if f.type!='CSRFTokenField' %}
+        {% if f.type == 'BooleanField' %}
+        {{ render_checkbox_field(f) }}
+        {% else %}
+        {{ render_field(f) }}
+        {% endif %}
+        {% endfor %}
+        {% endif %}
+        <hr />
+        <div class="w-95" style="margin-bottom:16px;">
+            {% if return_url %}
+            <a class="{{btn_class1}} button back"  href="{{ return_url }}" title="{{ return_text }}')}}">{{ return_text }}</a>
+            {% endif %}
+            {% if action_text %}
+            <button type="submit" class="{{ btn_class }} save">{{ action_text }} </button>
+            {% endif %}
+        </div>
+    </form>
+</div>
+{%- endmacro %}
+
+{% macro render_filter_form(form, action_url='', ajax_update='', class='') -%}
+<form method="POST" action="{{ action_url }}" role="form" class="{{ class_ }}" data-ajax-update="{{ ajax_update }}">
+    {{ form.hidden_tag() if form.hidden_tag }}
+    {% if caller %}
+    {{ caller() }}
+    {% else %}
+    {% for f in form if f.type!='CSRFTokenField' %}
+    <div class="float-left">
+        {{ f }}
+    </div>
+    {% endfor %}
+    {% endif %}
+</form>
+{%- endmacro %}
+
+{% macro render_filter_modal_form(form, action_url='', ajax_update='', class_='', btn_class='btn btn-primary',modal_header='Search',return_text='Close',action_text='Search') -%}
+<div id="myModal" class="modal">
+    <!-- Modal content -->
+    <div class="modal-content">
+        <div class="modal-header">
+            <h2>{{ modal_header }}</h2>
+        </div>
+        <div class="modal-body">
+            <div class="w-70">
+                <form method="POST" action="{{ action_url }}" role="form" class="{{ class_ }}" data-ajax-update="{{ ajax_update }}">
+                    {{ form.hidden_tag() if form.hidden_tag }}
+                    {% if caller %}
+                    {{ caller() }}
+                    {% else %}
+                    {% for f in form if f.type!='CSRFTokenField' %}
+                    {{ render_field(f) }}
+                    {% endfor %}
+                    {% endif %}
+                    <hr />
+                    <div class="w-95" style="margin-bottom:16px;">
+                        {% if return_text %}
+                        <button class="{{ btn_class }} close">{{ return_text }} </button>
+                        {% endif %}
+                        {% if action_text %}
+                        <button type="submit" class="{{ btn_class }} filter">{{ action_text }} </button>
+                        {% endif %}
+                    </div>
+                </form>
+            </div>
+            <div style="clear:both;"></div>
+        </div>
+    </div>
+</div>
+{%- endmacro %}

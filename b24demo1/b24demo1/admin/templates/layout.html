@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ title }}</title>
+    <link rel="stylesheet" type="text/css" href="{{ url_for('admin.static', filename='content/bootstrap-3.3.7/css/bootstrap.min.css') }}" />
+    <link rel="stylesheet" type="text/css" href="{{ url_for('admin.static', filename='content/site.css') }}" />
+    <link rel="stylesheet" type="text/css" href="{{ url_for('admin.static', filename='styles/style.css') }}" />
+    <link type="text/css" rel="stylesheet" href="{{ url_for("admin.static", filename="content/bootstrap-datepicker-1.6.4/css/bootstrap-datepicker3.min.css") }}" />
+    <script src="{{ url_for('admin.static', filename='scripts/jquery.js') }}"></script>
+</head>
+<body>
+    {% block body %}
+    {% include "navbar.html" %}
+    <div id="body-content" class="container-fluid body-content">
+        {% block content %}{% endblock %}
+    </div>
+    {% endblock %}
+
+    <!-- core -->
+    <script src="{{ url_for('admin.static', filename='scripts/jquery-ui-1.8.20.min.js') }}"></script>
+    <script src="{{ url_for('admin.static', filename='scripts/jquery.unobtrusive-ajax.js') }}"></script>
+    <script src="{{ url_for('admin.static', filename='scripts/jquery.validate.min.js') }}"></script>
+    <script src="{{ url_for('admin.static', filename='scripts/jquery.validate.unobtrusive.min.js') }}"></script>
+    <!-- end core-->
+
+    <script src="{{ url_for('admin.static', filename='scripts/bootstrap.js') }}"></script>
+    <script src="{{ url_for('admin.static', filename='scripts/respond.js') }}"></script>
+    <script type="text/javascript" src="{{ url_for("admin.static", filename="content/bootstrap-datepicker-1.6.4/js/bootstrap-datepicker.min.js") }}"></script>
+    <script src="{{ url_for('admin.static', filename='scripts/prototype.js') }}"></script>
+     <script type="text/javascript">
+        $(document).ready(function () {
+            //app = {};
+
+            // waiting & ready
+            app.skip_wait = false;
+            app.wait = function (text) {
+                if (app.skip_wait) {
+                    app.skip_wait = false;
+                    return;
+                }
+                if ($("#wait").length == 0) {
+                    var display = text || "waiting...";
+                    var wait = $('<div id="wait" style="z-index:1000;position:fixed;top:0;right:0;bottom:0;left:0;margin:auto;' +
+                                                       'width:140px;height:100px;border:1px solid #ddd;border-radius:4px;' +
+                                                       'background:#fff;">' +
+                                 '<div class="loader"></div>' +
+                                 '<div style="position:absolute;bottom:0;width:100%;text-align:center;padding:8px;">Loading ...</div></div>');
+                    $("body").append(wait);
+                }
+                else {
+                    $("#wait").show();
+                }
+            };
+            app.ready = function () {
+                $("#wait").hide();
+            };
+
+
+            $(".modal-body a").die().live("click", function () {
+                console.log('t');
+                $("[id^=modal-]").modal('hide');
+            });
+
+        });
+    </script>
+
+    {% block scripts %}{% endblock %}
+
+</body>
+</html>

@@ -1,0 +1,225 @@
+{# Renders field for bootstrap 3 standards.
+
+    Params:
+        field - WTForm field
+        kwargs - pass any arguments you want in order to put them into the html attributes.
+        There are few exceptions: for - for_, class - class_, class__ - class_
+
+    Example usage:
+{{ macros.render_field(form.email, placeholder='Input email', type='email') }}
+#}
+{% macro render_field(field, class="", label_visible=true) -%}
+<div class="form-group {% if field.errors %}has-error{% endif %} {{ kwargs.pop('class_', '') }}">
+    {% if (field.type != 'HiddenField' and field.type !='CSRFTokenField') and label_visible %}
+    <label for="{{ field.id }}" class="control-label">{{ field.label.text }}</label>
+    {% endif %}
+    {{ field(class_="form-control" + " " + class, **kwargs) }}
+    <!--{% if field.errors %}
+        {% for e in field.errors %}
+            <p class="help-block">{{ e }}</p>
+        {% endfor %}
+    {% endif %}-->
+    {% if field.errors %}
+    <span class="field-validation-invalid field-validation-error text-danger" data-valmsg-for="{{field.name}}" data-valmsg-replace="true">
+        {% for error in field.errors %}
+        <span for="{{field.name}}" generated="true" class="">{{ error }}</span>
+        {% endfor %}
+    </span>
+    {% else: %}
+    <span class="field-validation-valid" data-valmsg-for="{{field.name}}" data-valmsg-replace="true"></span>
+    {% endif %}
+</div>
+{%- endmacro %}
+
+{% macro render_field_error(field, label_visible=true) -%}
+<div class="form-group {% if field.errors %}has-error{% endif %} {{ kwargs.pop('class_', '') }}">
+    {% if field.errors %}
+    {% for e in field.errors %}
+    <p class="help-block">{{ e }}</p>
+    {% endfor %}
+    {% endif %}
+</div>
+{%- endmacro %}
+
+
+{# Renders checkbox fields since they are represented differently in bootstrap
+    Params:
+        field - WTForm field (there are no check, but you should put here only BooleanField.
+        kwargs - pass any arguments you want in order to put them into the html attributes.
+        There are few exceptions: for - for_, class - class_, class__ - class_
+
+    Example usage:
+{{ macros.render_checkbox_field(form.remember_me) }}
+ #}
+{% macro render_checkbox_field(field) -%}
+<div class="checkbox">
+    <label>
+        {{ field(type='checkbox', **kwargs) }} {{ field.label }}
+    </label>
+</div>
+{%- endmacro %}
+
+{# Renders radio field
+    Params:
+        field - WTForm field (there are no check, but you should put here only BooleanField.
+        kwargs - pass any arguments you want in order to put them into the html attributes.
+        There are few exceptions: for - for_, class - class_, class__ - class_
+
+    Example usage:
+{{ macros.render_radio_field(form.answers) }}
+ #}
+{% macro render_radio_field(field) -%}
+    {% for value, label, _ in field.iter_choices() %}
+<div class="radio">
+    <label>
+        <input type="radio" name="{{ field.id }}" id="{{ field.id }}" value="{{ value }}">{{ label }}
+    </label>
+</div>
+    {% endfor %}
+{%- endmacro %}
+
+{% macro render_error(field) -%}
+    {% if field.errors %}
+<div class="alert-danger alert">
+    {% for e in field.errors %}
+    <p class="help-block">{{ e }}</p>
+    {% endfor %}
+</div>
+    {% endif %}
+{%- endmacro %}
+
+{# Renders WTForm in bootstrap way. There are two ways to call function:
+     - as macros: it will render all field forms using cycle to iterate over them
+     - as call: it will insert form fields as you specify:
+     e.g. {% call macros.render_form(form, action_url=url_for('login_view'), action_text='Login',
+                                        class_='login-form') %}
+{{ macros.render_field(form.email, placeholder='Input email', type='email') }}
+{{ macros.render_field(form.password, placeholder='Input password', type='password') }}
+{{ macros.render_checkbox_field(form.remember_me, type='checkbox') }}
+            {% endcall %}
+
+     Params:
+        form - WTForm class
+        action_url - url where to submit this form
+        action_text - text of submit button
+        class_ - sets a class for form
+    #}
+
+
+{% macro render_form(form, action_url="", action_text="Save", edit_url="", edit_text="Edit", delete_url="", delete_text="Delete", return_url="", return_text="Back", class_="", btn_class="btn btn-primary", pull_class="", id="form", enctype="", data_ajax="", ajax_update="", is_use_panel=true ) -%}
+<form method="POST" action="{{ action_url }}" data-toggle="validator" role="form" class="{{ class_ }}" id="{{id}}" enctype="{{enctype}}" data-ajax="{{data_ajax}}" data-ajax-update="{{ajax_update}}">
+    {{ form.hidden_tag() if form.hidden_tag }}
+    {% if caller %}
+    {% if 'id' in form %}
+    {{ render_error(form.id) }}
+    {% endif %}
+    {{ caller() }}
+    {% else %}
+    {% for f in form if f.type!='CSRFTokenField' %}
+    {% if f.type == 'BooleanField' %}
+    {{ render_checkbox_field(f) }}
+    {% else %}
+
+    {% if f.type == 'HiddenField' or not is_use_panel %}
+    {{ render_field(f) }}
+    {% else %}
+    <div class="col-xs-12 col-sm-6 col-md-6">
+        {{ render_field(f) }}
+    </div>
+    {% endif %}
+
+    {% endif %}
+    {% endfor %}
+    {% endif %}
+
+    <!--<hr />
+    <div class="row">
+        <div class="col-xs-12 col-sm-12 col-md-12">
+            <div class="form-group pull-right">
+                <div class="btn-group">
+                    {% if return_url %}
+                    <a class="btn btn-default" href="{{ return_url }}" title="{{ return_text }}">{{ return_text }}</a>
+                    {% endif %}
+                    {% if action_text %}
+                    <button type="submit" class="{{ btn_class }}">{{ action_text }} </button>
+                    {% elif edit_url %}
+                    <a class="btn btn-default" href="{{ edit_url }}" title="{{ edit_text }}">{{ edit_text }}</a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>-->
+    {% if return_rul or action_text %}
+    
+    <div class="row">
+        <div class="col-xs-12 col-sm-12 col-md-12">
+            <div class="form-group pull-right hidden-xs">
+                {% if return_url %}
+                <a class="btn btn-default" href="{{ return_url }}">{{ return_text }}</a>
+                {% endif %}
+                <div class="btn-group">
+                    {% if action_url %}
+                    <button type="submit" class="{{ btn_class }}">{{ action_text }}</button>
+                    {% elif edit_url %}
+                    <a class="btn btn-info" href="{{ edit_url }}">{{ edit_text }}</a>
+                    {% endif %}
+                    {% if delete_url %}
+                    <a class="btn btn-danger" href="{{ delete_url }}">{{ delete_text }}</a>
+                    {% endif %}
+                </div>
+            </div>
+            <!-- action buttons visible xs -->
+            <div class="form-group pull-right visible-xs" style="width:100%;">
+                <div class="btn-group-vertical" style="width:100%;">
+                    {% if action_url %}
+                    <button type="submit" class="{{ btn_class }} btn-block">{{ action_text }}</button>
+                    {% elif edit_url %}
+                    <a class="btn btn-default btn-block" href="{{ edit_url }}">{{ edit_text }}</a>
+                    {% endif %}
+                    {% if delete_url %}
+                    <a class="btn btn-danger btn-block" href="{{ delete_url }}">{{ delete_text }}</a>
+                    {% endif %}
+                </div>
+                <br />
+                <br />
+                {% if return_url %}
+                <a class="btn btn-default btn-block" href="{{ return_url }}">{{ return_text }}</a>
+                {% endif %}
+            </div>
+            <!-- end action buttons visible xs -->
+        </div>
+    </div>
+    {% endif %}
+</form>
+{%- endmacro %}
+
+{% macro render_filter_form(form, action_url="", ajax_update="", class_="", title=_("Search")) -%}
+<form id="frm-search" action="{{ action_url }}" method="POST" role="form" class="{{ class_ }}" data-ajax-update="{{ ajax_update }}">
+    <div class="panel panel-default">
+        <div class="panel-heading">
+            {{ title }}
+            <a data-toggle="collapse" href="#collapse-search" class="pull-right" data-ajax="false">
+                <span class="glyphicon glyphicon-chevron-down"></span>
+            </a>
+        </div>
+        <div id="collapse-search" class="collapse in">
+            <div class="panel-body">
+                {{ form.hidden_tag() if form.hidden_tag }}
+                {% if caller %}
+                {{ caller() }}
+                {% else %}
+                <div class="row">
+                    {% for f in form if f.type!="CSRFTokenField" %}
+                    <div class="col-xs-12 col-sm-4 col-md-2">
+                        <div class="form-group">
+                            {{ f(class_="form-control") }}
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</form>
+{%- endmacro %}
